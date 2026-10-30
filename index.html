@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Selamat Ulang Tahun, Ibu! 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffeef5;--card:#fff;--ink:#5a2a45;--pink:#ff6fa5;--pink2:#ffb3d1;--yel:#ffd95e;--mint:#9fe6cf;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1422;--card:#3d2033;--ink:#ffe3ef;--pink:#ff7fb1;--pink2:#7a3556}}
+:root[data-theme="dark"]{--bg:#2a1422;--card:#3d2033;--ink:#ffe3ef;--pink:#ff7fb1;--pink2:#7a3556}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Fredoka',system-ui,sans-serif;text-align:center;overflow-x:hidden}
+.script{font-family:'Pacifico',cursive,serif}
+.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
+.cover .gift{font-size:96px;animation:bounce 1.2s infinite}
+h1{margin:0;font-size:clamp(32px,8vw,56px);color:var(--pink)}
+h2{color:var(--pink);margin:0 0 12px}
+.btn{border:0;background:var(--pink);color:#fff;font:600 18px 'Fredoka',sans-serif;padding:14px 28px;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.15);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
+section{max-width:760px;margin:0 auto;padding:36px 20px}
+.photos{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.polaroid{background:var(--card);padding:12px 12px 8px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.15);width:min(300px,80vw);transition:transform .3s}
+.polaroid:nth-child(1){transform:rotate(-4deg)}.polaroid:nth-child(2){transform:rotate(4deg)}
+.polaroid:hover{transform:rotate(0) scale(1.04)}
+.frame{aspect-ratio:1/1;border-radius:8px;background:var(--pink2);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;font-size:15px;flex-direction:column;gap:6px}
+.frame img{width:100%;height:100%;object-fit:cover}
+.frame span{font-size:44px}
+.cap{margin-top:8px;font-weight:600}
+.cake{font-size:clamp(90px,26vw,150px);cursor:pointer;user-select:none;line-height:1}
+.cake.pop{animation:wiggle .5s}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.card{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 6px 16px rgba(0,0,0,.1)}
+.card b{display:block;font-size:34px}
+.quote{max-width:440px;margin:0 auto;min-height:170px;border:0;width:100%;border-radius:28px;padding:26px 22px;color:#fff;font:600 21px/1.4 'Fredoka',sans-serif;cursor:pointer;box-shadow:0 8px 0 rgba(0,0,0,.15);animation:pop .4s}
+.quote small{display:block;margin-top:12px;font-size:14px;opacity:.85}
+@keyframes pop{0%{transform:scale(.8) rotate(-4deg)}60%{transform:scale(1.06) rotate(2deg)}100%{transform:scale(1)}}
+.music{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:20;width:54px;height:54px;border-radius:50%;border:0;background:var(--yel);font-size:26px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.music.on{animation:spin 3s linear infinite}
+.float{position:fixed;top:-40px;font-size:28px;pointer-events:none;z-index:10;animation:fall linear forwards}
+.balloons span{position:fixed;bottom:-60px;font-size:40px;z-index:0;pointer-events:none;animation:rise linear infinite;opacity:.85}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@keyframes rise{to{transform:translateY(-120vh)}}
+@keyframes bounce{50%{transform:translateY(-16px) rotate(6deg)}}
+@keyframes wiggle{25%{transform:rotate(-8deg) scale(1.1)}75%{transform:rotate(8deg) scale(1.1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+section,.cover{position:relative;z-index:1}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.js"></script>
+<script>
+const { useState, useRef, useEffect } = React;
+const html = htm.bind(React.createElement);
+/* ===== PENGATURAN (edit di sini saja) ===== */
+const NAMA = "Ibu";        // nama/panggilan ibumu
+const FOTO_1 = "foto1.jpeg";         // contoh: "foto1.jpg"
+const FOTO_2 = "foto2.png";         // contoh: "foto2.jpg"
+const MUSIK = "musik.mp3";          // contoh: "musik.mp3" (kosong = pakai melodi bawaan)
+/* ========================================= */
+
+/* ---- Musik: melodi Happy Birthday dibuat langsung dengan Web Audio ---- */
+const F = {C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,Bb4:466.16,C5:523.25};
+const SONG = [["C4",.75],["C4",.25],["D4",1],["C4",1],["F4",1],["E4",2],
+["C4",.75],["C4",.25],["D4",1],["C4",1],["G4",1],["F4",2],
+["C4",.75],["C4",.25],["C5",1],["A4",1],["F4",1],["E4",1],["D4",2],
+["Bb4",.75],["Bb4",.25],["A4",1],["F4",1],["G4",1],["F4",2]];
+const music = { ctx:null, on:false, timer:null, i:0 };
+function note(freq, dur){
+  const c = music.ctx, o = c.createOscillator(), g = c.createGain();
+  o.type = "triangle"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, c.currentTime);
+  g.gain.linearRampToValueAtTime(.18, c.currentTime+.03);
+  g.gain.exponentialRampToValueAtTime(.001, c.currentTime+dur);
+  o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+dur);
+}
+function step(){
+  if(!music.on) return;
+  const [n,b] = SONG[music.i % SONG.length], beat = .42;
+  note(F[n], b*beat*1.1);
+  music.i++;
+  music.timer = setTimeout(step, b*beat*1000 + (music.i % SONG.length === 0 ? 900 : 0));
+}
+function setMusic(v){
+  if(MUSIK){
+    music.audio = music.audio || Object.assign(new Audio(MUSIK),{loop:true});
+    v ? music.audio.play().catch(()=>{}) : music.audio.pause();
+    return;
+  }
+  try{
+    if(v){
+      music.ctx = music.ctx || new (window.AudioContext||window.webkitAudioContext)();
+      music.ctx.resume(); music.on = true; step();
+    } else { music.on = false; clearTimeout(music.timer); }
+  }catch(e){}
+}
+
+/* ---- Komponen ---- */
+function Photo({caption, emoji, def}){
+  const [src,setSrc] = useState(def||null);
+  const ref = useRef();
+  return html`<div class="polaroid">
+    <div class="frame" onClick=${()=>ref.current.click()}>
+      ${src ? html`<img src=${src} alt=${caption}/>` : html`<span>${emoji}</span><div>Ketuk untuk pasang foto</div>`}
+    </div>
+    <input ref=${ref} type="file" accept="image/*" hidden onChange=${e=>{const f=e.target.files[0]; if(f) setSrc(URL.createObjectURL(f));}}/>
+    <div class="cap">${caption}</div>
+  </div>`;
+}
+
+const KATA = [
+["Ibu adalah pelukan paling hangat di dunia 🤗","#ff6fa5"],
+["Masakan Ibu itu bintang lima, tidak ada lawannya! 🍳","#ff9f43"],
+["Terima kasih sudah sabar menghadapi aku yang bandel 🙈","#a29bfe"],
+["Senyum Ibu bikin hariku jadi cerah ☀️","#f6b93b"],
+["Ibu itu superhero tanpa jubah 🦸‍♀️","#00b894"],
+["Doa Ibu adalah kekuatan terbesarku 🙏","#e17055"],
+["Semoga Ibu makin cantik, makin sehat, makin bahagia 🌷","#fd79a8"],
+["Kalau ada tombol pause untuk waktu, aku mau pause bareng Ibu ⏳","#0984e3"],
+["Ibu, kamu adalah rumah paling nyaman buatku 🏡","#6c5ce7"],
+["Umur cuma angka, Ibu tetap yang paling kece! 😎","#e84393"],
+["I love you to the moon and back, Bu! 🌙","#00a8a8"],
+["Hari ini Ibu boleh santai, semua pekerjaan libur! 👑","#d63031"]
+];
+function Kata(){
+  const [i,setI] = useState(0);
+  const [n,setN] = useState(0);
+  function next(){ let j; do{ j = Math.floor(Math.random()*KATA.length); }while(j===i); setI(j); setN(n+1); }
+  return html`<button key=${n} class="quote" style=${{background:KATA[i][1]}} onClick=${next}>
+    ${KATA[i][0]}<small>👆 ketuk lagi untuk kata-kata baru</small>
+  </button>`;
+}
+
+function Balloons(){
+  const items = ["🎈","🎈","🎈","🎀","🎈","🎈"];
+  return html`<div class="balloons">${items.map((b,i)=>html`<span key=${i} style=${{left:(8+i*17)+"%",animationDuration:(9+i*2)+"s",animationDelay:(i*1.3)+"s"}}>${b}</span>`)}</div>`;
+}
+
+function App(){
+  const [open,setOpen] = useState(false);
+  const [musicOn,setMusicOn] = useState(false);
+  const [bits,setBits] = useState([]);
+  const [candles,setCandles] = useState(true);
+  const [pop,setPop] = useState(false);
+  const id = useRef(0);
+
+  function confetti(){
+    const em = ["🎉","✨","💖","🌸","🎊","⭐","🍰"];
+    const n = Array.from({length:30},()=>({k:id.current++,e:em[Math.floor(Math.random()*em.length)],l:Math.random()*100,d:2+Math.random()*2.5}));
+    setBits(b=>[...b,...n]);
+    setTimeout(()=>setBits(b=>b.filter(x=>!n.includes(x))),5000);
+  }
+  function openGift(){ setOpen(true); setMusic(true); setMusicOn(true); confetti(); }
+  function toggleMusic(){ setMusic(!musicOn); setMusicOn(!musicOn); }
+  function cake(){
+    setCandles(c=>!c); setPop(true); setTimeout(()=>setPop(false),500);
+    if(candles) confetti();
+  }
+
+  const float = bits.map(b=>html`<div key=${b.k} class="float" style=${{left:b.l+"%",animationDuration:b.d+"s"}}>${b.e}</div>`);
+
+  if(!open) return html`<div class="cover">
+    <div class="gift">🎁</div>
+    <h1 class="script">Ada kejutan untukmu!</h1>
+    <p>Ketuk tombol di bawah ya, ${NAMA} 💕 (nyalakan suara ya!)</p>
+    <button class="btn" onClick=${openGift}>Buka Kejutan 🎀</button>
+  </div>`;
+
+  return html`<div>
+    <${Balloons}/>
+    ${float}
+    <button class=${"music"+(musicOn?" on":"")} onClick=${toggleMusic} title="Musik">${musicOn?"🎵":"🔇"}</button>
+    <section>
+      <div style=${{fontSize:"56px"}}>🎂🎉</div>
+      <h1 class="script">Selamat Ulang Tahun, ${NAMA}!</h1>
+      <p style=${{fontSize:"20px"}}>Hari ini hari spesial untuk orang paling spesial 💖</p>
+    </section>
+    <section>
+      <h2>Kenangan Manis Kita 📸</h2>
+      <div class="photos">
+        <${Photo} caption="Ibu yang paling cantik 🌷" emoji="👩" def=${FOTO_1}/>
+        <${Photo} caption="Ibu adalah alasan menjadi tempar ulang! 🥰" emoji="👨‍👩‍👧" def=${FOTO_2}/>
+      </div>
+    </section>
+    <section>
+      <h2>Tiup lilinnya, ${NAMA}! 🕯️</h2>
+      <div class=${"cake"+(pop?" pop":"")} onClick=${cake}>${candles?"🎂":"🍰"}</div>
+      <p>${candles?"Ketuk kuenya untuk meniup lilin & buat permohonan ✨":"Yeay! Semoga semua permohonan Ibu terkabul 🥳"}</p>
+    </section>
+    <section>
+      <h2>Kata-Kata Manis Untuk Ibu 💬</h2>
+      <${Kata}/>
+    </section>
+    <section>
+      <h2>Doa & Harapan dari Aku 💌</h2>
+      <div class="cards">
+        <div class="card"><b>💪</b>Semoga Ibu selalu sehat dan kuat</div>
+        <div class="card"><b>😄</b>Semoga setiap hari Ibu penuh senyum</div>
+        <div class="card"><b>🍀</b>Semoga rezeki Ibu lancar dan berkah</div>
+        <div class="card"><b>🤗</b>Terima kasih sudah menyayangiku tanpa henti</div>
+      </div>
+    </section>
+    <section>
+      <p class="script" style=${{fontSize:"26px",color:"var(--pink)"}}>Aku sayang Ibu banyak-banyak! 💗</p>
+      <button class="btn" onClick=${confetti}>Hujan Konfeti! 🎊</button>
+      <p style=${{opacity:.7}}>Dibuat dengan cinta oleh anakmu 🌸</p>
+    </section>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+</script>
+</body>
+</html>
